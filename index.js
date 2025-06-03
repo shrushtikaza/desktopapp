@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("playBtn").addEventListener("click", () => {
-    const playlistUri = "spotify:playlist:37i9dQZF1EP6YuccBxUcC1"; // change to your playlist
+    const playlistUri = "spotify:playlist:37i9dQZF1EJsTd4HaudjCg"; 
     window.electronAPI.playPlaylist("spotify:playlist:37i9dQZF1EJsTd4HaudjCg");
   });
 });
