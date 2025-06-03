@@ -1,33 +1,10 @@
-const path = require("path");
-const { app, BrowserWindow, ipcMain } = require("electron");
-const fs = require("fs");
-
-let win;
-
-function createWindow() {
-  win = new BrowserWindow({
-    width: 550,
-    height: 600,
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      preload: path.join(__dirname, "preload.js"),
-    },
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("loginBtn").addEventListener("click", () => {
+    window.electronAPI.loginToSpotify();
   });
 
-  win.removeMenu();
-  win.loadFile("index.html");
-  
-  ipcMain.on("load-page", (event, page) => {
-    win.loadFile(page);
-  });
-}
-
-app.whenReady().then(() => {
-  createWindow();
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
+  document.getElementById("playBtn").addEventListener("click", () => {
+    const playlistUri = "spotify:playlist:37i9dQZF1EP6YuccBxUcC1"; // change to your playlist
+    window.electronAPI.playPlaylist("spotify:playlist:37i9dQZF1EJsTd4HaudjCg");
   });
 });
