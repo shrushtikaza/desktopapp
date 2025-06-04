@@ -1,60 +1,54 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
-require("dotenv").config();
 const express = require("express");
+const https = require("https");
+const fs = require("fs");
+const axios = require("axios");
+require("dotenv").config();
+const open = require("open");
 
 const clientId = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 const redirectUri = "https://localhost:8888/callback";
 
 let accessToken = "";
-let win;
-
-const open = (...args) => import("open").then(m => m.default(...args));
 
 function createWindow() {
-  win = new BrowserWindow({
-    width: 550,
-    height: 600,
+  const win = new BrowserWindow({
+    width: 600,
+    height: 500,
     webPreferences: {
-      contextIsolation: true,
       preload: path.join(__dirname, "preload.js"),
+      contextIsolation: true,
     },
   });
 
-  win.removeMenu();
   win.loadFile("index.html");
 
-  ipcMain.on("load-page", (_, page) => {
-    win.loadFile(page);
-  });
-
   ipcMain.on("spotify-login", () => {
-    open("http://localhost:8888/login");
+    open("https://localhost:8888/login");
   });
 
-  ipcMain.on("play-playlist", async (_, playlistUri) => {
+  ipcMain.on("play-playlist", async (event, playlistUri) => {
     if (!accessToken) {
       console.log("Access token missing. Login first.");
       return;
     }
 
     try {
-      await fetch("https://api.spotify.com/v1/me/player/play", {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          context_uri: playlistUri,
-          offset: { position: 0 },
-        }),
-      });
-
-      console.log("▶️ Playlist started:", playlistUri);
+      await axios.put(
+        "https://api.spotify.com/v1/me/player/play",
+        { context_uri: playlistUri },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Playlist started");
     } catch (err) {
-      console.error("Error starting playlist:", err);
+      console.error("Play error:", err.response?.data || err.message);
     }
   });
 }
@@ -62,47 +56,47 @@ function createWindow() {
 app.whenReady().then(() => {
   createWindow();
 
-  const authApp = express();
+  // Setup HTTPS Express server
+  const appServer = express();
+  const certOptions = {
+    key: fs.readFileSync("certs/key.pem"),
+    cert: fs.readFileSync("certs/cert.pem"),
+  };
 
-  authApp.get("/login", (req, res) => {
-    const scopes = [
-      "user-read-playback-state",
-      "user-modify-playback-state",
-      "user-read-currently-playing"
-    ].join(" ");
-
+  appServer.get("/login", (req, res) => {
+    const scopes = "user-read-playback-state user-modify-playback-state user-read-currently-playing";
     const authUrl = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${encodeURIComponent(scopes)}&redirect_uri=${redirectUri}`;
-    open(authUrl);
-    res.send("Logging in to Spotify...");
+    res.redirect(authUrl);
   });
 
-  authApp.get("/callback", async (req, res) => {
+  appServer.get("/callback", async (req, res) => {
     const code = req.query.code;
 
     try {
-      const response = await fetch("https://accounts.spotify.com/api/token", {
-        method: "POST",
-        headers: {
-          Authorization:
-            "Basic " + Buffer.from(`${clientId}:${clientSecret}`).toString("base64"),
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
+      const response = await axios.post(
+        "https://accounts.spotify.com/api/token",
+        new URLSearchParams({
           grant_type: "authorization_code",
           code,
           redirect_uri: redirectUri,
         }),
-      });
+        {
+          headers: {
+            Authorization: "Basic " + Buffer.from(`${clientId}:${clientSecret}`).toString("base64"),
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
 
-      const data = await response.json();
-      accessToken = data.access_token;
+      accessToken = response.data.access_token;
       res.send("Login successful! You can return to the app.");
     } catch (err) {
-      res.send("Error fetching access token.");
+      console.error("Token error:", err.response?.data || err.message);
+      res.send("Failed to get access token.");
     }
   });
 
-  authApp.listen(8888, () => {
-    console.log("Auth server running at http://localhost:8888/login");
+  https.createServer(certOptions, appServer).listen(8888, () => {
+    console.log("🔐 Auth server running at https://localhost:8888/login");
   });
 });

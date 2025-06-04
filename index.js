@@ -1,10 +1,17 @@
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("loginBtn").addEventListener("click", () => {
-    window.electronAPI.loginToSpotify();
-  });
+window.addEventListener("DOMContentLoaded", () => {
+  const loginBtn = document.getElementById("loginBtn");
+  const playBtn = document.getElementById("playBtn");
 
-  document.getElementById("playBtn").addEventListener("click", () => {
-    const playlistUri = "spotify:playlist:37i9dQZF1EJsTd4HaudjCg"; 
-    window.electronAPI.playPlaylist("spotify:playlist:37i9dQZF1EJsTd4HaudjCg");
-  });
+  if (loginBtn) {
+    loginBtn.addEventListener("click", () => {
+      window.electronAPI.loginToSpotify();
+    });
+  }
+
+  if (playBtn) {
+    playBtn.addEventListener("click", () => {
+      const playlistUri = "spotify:playlist:37i9dQZF1EJsTd4HaudjCg";
+      window.electronAPI.playPlaylist(playlistUri);
+    });
+  }
 });

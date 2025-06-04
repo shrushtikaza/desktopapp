@@ -1,43 +1,17 @@
 <!DOCTYPE html>
 <html>
+  <script src="index.js"></script>
 <head>
-  <meta charset="UTF-8" />
-  <title>Spotify Electron Player</title>
+  <title>Spotify Player</title>
   <style>
-    body {
-      background: #121212;
-      color: #1DB954;
-      font-family: sans-serif;
-      text-align: center;
-      padding: 30px;
-    }
-
-    h1 {
-      margin-bottom: 40px;
-    }
-
-    button {
-      padding: 12px 20px;
-      margin: 15px;
-      font-size: 16px;
-      border: none;
-      border-radius: 6px;
-      background-color: #1DB954;
-      color: white;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #1ed760;
-    }
+    body { text-align: center; font-family: sans-serif; margin-top: 50px; background: #191414; color: #1DB954; }
+    button { padding: 10px 20px; margin: 20px; font-size: 16px; background: #1DB954; color: white; border: none; border-radius: 5px; }
+    button:hover { background: #1ed760; }
   </style>
 </head>
 <body>
-  <h1>🎧 Spotify Player</h1>
-  <button id="loginBtn">Login to Spotify</button>
-  <br>
-  <button id="playBtn">Play Playlist</button>
-
-  <script src="index.js"></script>
+  <h1>🎧 Spotify Playlist Player</h1>
+  <button onclick="window.electronAPI.loginToSpotify()">Login to Spotify</button>
+  <button onclick="window.electronAPI.playPlaylist('spotify:playlist:37i9dQZF1DXcBWIGoYBM5M')">Play Playlist</button>
 </body>
 </html>
