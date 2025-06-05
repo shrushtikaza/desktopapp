@@ -1,11 +1,10 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, shell } = require("electron");
 const path = require("path");
 const express = require("express");
 const https = require("https");
 const fs = require("fs");
 const axios = require("axios");
 require("dotenv").config();
-const open = require("open");
 
 const clientId = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -26,7 +25,7 @@ function createWindow() {
   win.loadFile("index.html");
 
   ipcMain.on("spotify-login", () => {
-    open("https://localhost:8888/login");
+    shell.openExternal("https://localhost:8888/login");
   });
 
   ipcMain.on("play-playlist", async (event, playlistUri) => {
@@ -99,4 +98,16 @@ app.whenReady().then(() => {
   https.createServer(certOptions, appServer).listen(8888, () => {
     console.log("🔐 Auth server running at https://localhost:8888/login");
   });
+
+  app.on("activate", () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+});
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
 });
