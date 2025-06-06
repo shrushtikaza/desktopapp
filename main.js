@@ -8,7 +8,7 @@ require("dotenv").config();
 
 const clientId = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-const redirectUri = "http://127.0.0.1:3000/callback";
+const redirectUri = "https://localhost:8888/callback";
 
 let accessToken = "";
 
@@ -25,7 +25,7 @@ function createWindow() {
   win.loadFile("index.html");
 
   ipcMain.on("spotify-login", () => {
-    shell.openExternal("http://127.0.0.1:3000/callback");
+    shell.openExternal("https://localhost:8888/login");
   });
 
   ipcMain.on("play-playlist", async (event, playlistUri) => {

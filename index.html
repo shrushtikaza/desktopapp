@@ -1,35 +1,452 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Spotify Player</title>
-  <style>
-    body { 
-      text-align: center; 
-      font-family: sans-serif; 
-      margin-top: 50px; 
-      background: #191414; 
-      color: #1DB954; 
-    }
-    button { 
-      padding: 10px 20px; 
-      margin: 20px; 
-      font-size: 16px; 
-      background: #1DB954; 
-      color: white; 
-      border: none; 
-      border-radius: 5px; 
-      cursor: pointer;
-    }
-    button:hover { 
-      background: #1ed760; 
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #191414 35%, #2d1b2d 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background particles */
+        .bg-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(29, 185, 84, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        .particle:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .particle:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            left: 70%;
+            animation-delay: -5s;
+        }
+
+        .particle:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            left: 30%;
+            animation-delay: -10s;
+        }
+
+        .particle:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            left: 85%;
+            animation-delay: -15s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            text-align: center;
+            max-width: 500px;
+            padding: 60px 40px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 32px 64px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: slideIn 0.8s ease-out;
+            position: relative;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .spotify-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+            display: inline-block;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+            margin-bottom: 48px;
+            font-weight: 400;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.02em;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+            color: white;
+            box-shadow: 0 8px 32px rgba(29, 185, 84, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(29, 185, 84, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 24px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        .status-dot.connected {
+            background: #1DB954;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .wave-animation {
+            position: absolute;
+            bottom: -50px;
+            left: -50px;
+            right: -50px;
+            height: 100px;
+            background: linear-gradient(90deg, transparent, rgba(29, 185, 84, 0.1), transparent);
+            animation: wave 3s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% {
+                transform: translateX(-100px) rotate(2deg);
+            }
+            50% {
+                transform: translateX(100px) rotate(-2deg);
+            }
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 40px 24px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+
+        /* Music note animations */
+        .music-notes {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            color: rgba(29, 185, 84, 0.3);
+            z-index: -1;
+        }
+
+        .note {
+            position: absolute;
+            animation: noteFloat 4s ease-in-out infinite;
+        }
+
+        .note:nth-child(1) {
+            top: -100px;
+            left: -80px;
+            animation-delay: 0s;
+        }
+
+        .note:nth-child(2) {
+            top: -60px;
+            right: -100px;
+            animation-delay: 1s;
+        }
+
+        .note:nth-child(3) {
+            bottom: -80px;
+            left: -60px;
+            animation-delay: 2s;
+        }
+
+        .note:nth-child(4) {
+            bottom: -100px;
+            right: -80px;
+            animation-delay: 3s;
+        }
+
+        @keyframes noteFloat {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-20px) rotate(10deg);
+                opacity: 0.6;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>🎧 Spotify Playlist Player</h1>
-  <button id="loginBtn" onclick="window.electronAPI.loginToSpotify()">Login to Spotify</button>
-  <button id="playBtn" onclick="window.electronAPI.playPlaylist('spotify:playlist:37i9dQZF1DXcBWIGoYBM5M')">Play Playlist</button>
-  
-  <script src="index.js"></script>
+    <div class="bg-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="container">
+        <div class="music-notes">
+            <div class="note">♪</div>
+            <div class="note">♫</div>
+            <div class="note">♪</div>
+            <div class="note">♬</div>
+        </div>
+        
+        <div class="spotify-icon">🎧</div>
+        <h1>Spotify Player</h1>
+        <p class="subtitle">Connect and control your music experience</p>
+        
+        <div class="button-group">
+            <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">
+                <span>🚀</span>
+                Connect to Spotify
+            </button>
+            
+            <button class="btn btn-secondary" id="playBtn" onclick="handlePlaylist()">
+                <span>▶️</span>
+                Play Featured Playlist
+            </button>
+        </div>
+        
+        <div class="status-indicator">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">Ready to connect</span>
+        </div>
+        
+        <div class="wave-animation"></div>
+    </div>
+
+    <script>
+        let isConnected = false;
+        
+        function handleLogin() {
+            const btn = document.getElementById('loginBtn');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            
+            // Visual feedback
+            btn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                btn.style.transform = '';
+            }, 150);
+            
+            // Simulate connection process
+            statusText.textContent = 'Connecting...';
+            
+            setTimeout(() => {
+                if (window.electronAPI && window.electronAPI.loginToSpotify) {
+                    window.electronAPI.loginToSpotify();
+                }
+                
+                // Update UI to show connected state
+                isConnected = true;
+                statusDot.classList.add('connected');
+                statusText.textContent = 'Connected to Spotify';
+                btn.innerHTML = '<span>✅</span>Connected';
+                btn.classList.add('btn-secondary');
+                btn.classList.remove('btn-primary');
+            }, 1000);
+        }
+        
+        function handlePlaylist() {
+            const btn = document.getElementById('playBtn');
+            
+            // Visual feedback
+            btn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                btn.style.transform = '';
+            }, 150);
+            
+            if (isConnected) {
+                if (window.electronAPI && window.electronAPI.playPlaylist) {
+                    window.electronAPI.playPlaylist('spotify:playlist:37i9dQZF1DXcBWIGoYBM5M');
+                }
+                
+                // Update button to show playing state
+                btn.innerHTML = '<span>🎵</span>Now Playing';
+                document.getElementById('statusText').textContent = 'Playing music...';
+            } else {
+                // Show connection required message
+                document.getElementById('statusText').textContent = 'Please connect to Spotify first';
+                setTimeout(() => {
+                    document.getElementById('statusText').textContent = 'Ready to connect';
+                }, 2000);
+            }
+        }
+        
+        // Add some interactive effects
+        document.addEventListener('mousemove', (e) => {
+            const container = document.querySelector('.container');
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            
+            container.style.transform = `perspective(1000px) rotateY(${x / 50}deg) rotateX(${-y / 50}deg)`;
+        });
+        
+        document.addEventListener('mouseleave', () => {
+            const container = document.querySelector('.container');
+            container.style.transform = '';
+        });
+    </script>
 </body>
 </html>
