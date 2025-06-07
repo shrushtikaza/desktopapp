@@ -336,117 +336,46 @@
     </style>
 </head>
 <body>
-    <div class="bg-particles">
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
+  <div class="bg-particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <div class="container">
+    <div class="music-notes">
+      <div class="note">♪</div>
+      <div class="note">♫</div>
+      <div class="note">♪</div>
+      <div class="note">♬</div>
     </div>
 
-    <div class="container">
-        <div class="music-notes">
-            <div class="note">♪</div>
-            <div class="note">♫</div>
-            <div class="note">♪</div>
-            <div class="note">♬</div>
-        </div>
-        
-        <div class="spotify-icon">🎧</div>
-        <h1>Spotify Player</h1>
-        <p class="subtitle">Connect and control your music experience</p>
-        
-        <div class="button-group">
-            <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">
-                <span>🚀</span>
-                Connect to Spotify
-            </button>
-            
-            <button class="btn btn-secondary" id="playBtn" onclick="handlePlaylist()">
-                <span>▶️</span>
-                Play Featured Playlist
-            </button>
-        </div>
-        
-        <div class="status-indicator">
-            <div class="status-dot" id="statusDot"></div>
-            <span id="statusText">Ready to connect</span>
-        </div>
-        
-        <div class="wave-animation"></div>
+    <div class="spotify-icon">🎧</div>
+    <h1>Spotify Player</h1>
+    <p class="subtitle">Connect and control your music experience</p>
+
+    <div class="button-group">
+      <button class="btn btn-primary" id="loginBtn">
+        <span>🚀</span>
+        Connect to Spotify
+      </button>
+
+      <button class="btn btn-secondary" id="playBtn">
+        <span>▶️</span>
+        Play Featured Playlist
+      </button>
     </div>
 
-    <script>
-        let isConnected = false;
-        
-        function handleLogin() {
-            const btn = document.getElementById('loginBtn');
-            const statusDot = document.getElementById('statusDot');
-            const statusText = document.getElementById('statusText');
-            
-            // Visual feedback
-            btn.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                btn.style.transform = '';
-            }, 150);
-            
-            // Simulate connection process
-            statusText.textContent = 'Connecting...';
-            
-            setTimeout(() => {
-                if (window.electronAPI && window.electronAPI.loginToSpotify) {
-                    window.electronAPI.loginToSpotify();
-                }
-                
-                // Update UI to show connected state
-                isConnected = true;
-                statusDot.classList.add('connected');
-                statusText.textContent = 'Connected to Spotify';
-                btn.innerHTML = '<span>✅</span>Connected';
-                btn.classList.add('btn-secondary');
-                btn.classList.remove('btn-primary');
-            }, 1000);
-        }
-        
-        function handlePlaylist() {
-            const btn = document.getElementById('playBtn');
-            
-            // Visual feedback
-            btn.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                btn.style.transform = '';
-            }, 150);
-            
-            if (isConnected) {
-                if (window.electronAPI && window.electronAPI.playPlaylist) {
-                    window.electronAPI.playPlaylist('spotify:playlist:37i9dQZF1DXcBWIGoYBM5M');
-                }
-                
-                // Update button to show playing state
-                btn.innerHTML = '<span>🎵</span>Now Playing';
-                document.getElementById('statusText').textContent = 'Playing music...';
-            } else {
-                // Show connection required message
-                document.getElementById('statusText').textContent = 'Please connect to Spotify first';
-                setTimeout(() => {
-                    document.getElementById('statusText').textContent = 'Ready to connect';
-                }, 2000);
-            }
-        }
-        
-        // Add some interactive effects
-        document.addEventListener('mousemove', (e) => {
-            const container = document.querySelector('.container');
-            const rect = container.getBoundingClientRect();
-            const x = e.clientX - rect.left - rect.width / 2;
-            const y = e.clientY - rect.top - rect.height / 2;
-            
-            container.style.transform = `perspective(1000px) rotateY(${x / 50}deg) rotateX(${-y / 50}deg)`;
-        });
-        
-        document.addEventListener('mouseleave', () => {
-            const container = document.querySelector('.container');
-            container.style.transform = '';
-        });
-    </script>
+    <div class="status-indicator">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Ready to connect</span>
+    </div>
+
+    <div class="wave-animation"></div>
+  </div>
+
+  <!-- JS loaded at the end -->
+  <script src="./index.js" defer></script>
 </body>
 </html>
