@@ -1,3 +1,4 @@
 node_modules/
 .env
 certs/
+ngrok_recovery_codes.txt

@@ -7,8 +7,7 @@ require("dotenv").config();
 
 const clientId = process.env.clientId;
 const clientSecret = process.env.clientSecret;
-let redirectUri = ""; // Will be set dynamically by ngrok
-
+let redirectUri = ""; 
 let accessToken = "";
 
 function createWindow() {
