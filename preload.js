@@ -1,4 +1,5 @@
-// Optional: for future use, such as securely exposing APIs
-window.addEventListener('DOMContentLoaded', () => {
-  console.log('Preload loaded');
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  getSongs: () => ipcRenderer.invoke('get-songs')
 });

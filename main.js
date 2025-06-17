@@ -1,5 +1,6 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -7,21 +8,18 @@ function createWindow() {
     height: 450,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-    },
-    resizable: false,
+      contextIsolation: true,
+      nodeIntegration: false,
+    }
   });
 
   win.loadFile('index.html');
 }
 
-app.whenReady().then(() => {
-  createWindow();
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
+ipcMain.handle('get-songs', () => {
+  const folder = path.join(__dirname, 'songs');
+  const files = fs.readdirSync(folder).filter(file => file.endsWith('.mp3'));
+  return files;
 });
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
+app.whenReady().then(createWindow);

@@ -1,10 +1,3 @@
-const songs = [
-  { title: "Iris - The Goo Goo Dolls", file: "songs/iris - the goo goo dolls.mp3" },
-  { title: "Time in a Bottle - Jim Croce", file: "songs/Time in a Bottle.mp3" }
-];
-
-let currentSongIndex = 0;
-
 const audio = document.getElementById('audio');
 const playPauseBtn = document.getElementById('playPauseBtn');
 const seekBar = document.getElementById('seekBar');
@@ -12,11 +5,24 @@ const volumeSlider = document.getElementById('volume');
 const currentTimeLabel = document.getElementById('currentTime');
 const totalTimeLabel = document.getElementById('totalTime');
 
+let songs = [];
+let currentSongIndex = 0;
+
+window.electronAPI.getSongs().then(files => {
+  if (files.length === 0) {
+    alert("No songs found in the /songs folder.");
+    return;
+  }
+  songs = files.map(f => ({ title: f, file: `songs/${f}` }));
+  loadSong(currentSongIndex);
+}).catch(err => {
+  console.error("Error getting songs:", err);
+});
+
 function loadSong(index) {
-  if (index < 0) index = 0;
-  if (index >= songs.length) index = 0;
-  currentSongIndex = index;
-  audio.src = songs[currentSongIndex].file;
+  if (!songs.length) return;
+  audio.src = songs[index].file;
+  document.querySelector('.cover img').alt = songs[index].title;
   playPauseBtn.textContent = '▶️';
   audio.load();
 }
@@ -31,15 +37,15 @@ function pauseSong() {
   playPauseBtn.textContent = '▶️';
 }
 
-// Skip Forward
 document.getElementById('forwardBtn').addEventListener('click', () => {
+  if (!songs.length) return;
   currentSongIndex = (currentSongIndex + 1) % songs.length;
   loadSong(currentSongIndex);
   playSong();
 });
 
-// Skip Back
 document.getElementById('backBtn').addEventListener('click', () => {
+  if (!songs.length) return;
   if (audio.currentTime < 5 && currentSongIndex > 0) {
     currentSongIndex--;
   }
@@ -47,7 +53,6 @@ document.getElementById('backBtn').addEventListener('click', () => {
   playSong();
 });
 
-// Play/Pause
 playPauseBtn.addEventListener('click', () => {
   if (audio.paused) {
     playSong();
@@ -56,31 +61,27 @@ playPauseBtn.addEventListener('click', () => {
   }
 });
 
-// Load duration
 audio.addEventListener('loadedmetadata', () => {
   totalTimeLabel.textContent = formatTime(audio.duration);
 });
 
-// Update seekbar
 audio.addEventListener('timeupdate', () => {
   const percent = (audio.currentTime / audio.duration) * 100;
   seekBar.value = percent;
   currentTimeLabel.textContent = formatTime(audio.currentTime);
 });
 
-// Change position
 seekBar.addEventListener('input', () => {
   const time = (seekBar.value / 100) * audio.duration;
   audio.currentTime = time;
 });
 
-// Volume
 volumeSlider.addEventListener('input', () => {
   audio.volume = volumeSlider.value;
 });
 
-// Auto-play next song
 audio.addEventListener('ended', () => {
+  if (!songs.length) return;
   currentSongIndex = (currentSongIndex + 1) % songs.length;
   loadSong(currentSongIndex);
   playSong();
@@ -91,6 +92,3 @@ function formatTime(seconds) {
   const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
   return `${mins}:${secs}`;
 }
-
-// Initialize
-loadSong(currentSongIndex);
