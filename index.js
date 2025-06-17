@@ -1,125 +1,53 @@
-const { app, BrowserWindow, ipcMain, shell } = require("electron");
-const path = require("path");
-const express = require("express");
-const axios = require("axios");
-const ngrok = require("ngrok");
-require("dotenv").config();
+const audio = document.getElementById('audio');
+const playPauseBtn = document.getElementById('playPauseBtn');
+const seekBar = document.getElementById('seekBar');
+const volumeSlider = document.getElementById('volume');
+const currentTimeLabel = document.getElementById('currentTime');
+const totalTimeLabel = document.getElementById('totalTime');
 
-const clientId = process.env.clientId;
-const clientSecret = process.env.clientSecret;
-let redirectUri = "";
-let accessToken = "";
-
-function createWindow() {
-  const win = new BrowserWindow({
-    width: 600,
-    height: 500,
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-      contextIsolation: true,
-    },
-  });
-
-  win.loadFile("index.html");
-}
-
-app.whenReady().then(async () => {
-  createWindow();
-
-  const appServer = express();
-
-  appServer.get("/login", (req, res) => {
-    const scopes = "user-read-playback-state user-modify-playback-state user-read-currently-playing";
-    const authUrl = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${encodeURIComponent(scopes)}&redirect_uri=${redirectUri}`;
-    res.redirect(authUrl);
-  });
-
-  appServer.get("/callback", async (req, res) => {
-    const code = req.query.code;
-
-    try {
-      const response = await axios.post(
-        "https://accounts.spotify.com/api/token",
-        new URLSearchParams({
-          grant_type: "authorization_code",
-          code,
-          redirect_uri: redirectUri,
-        }),
-        {
-          headers: {
-            Authorization: "Basic " + Buffer.from(`${clientId}:${clientSecret}`).toString("base64"),
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      );
-
-      accessToken = response.data.access_token;
-      BrowserWindow.getAllWindows()[0].webContents.send("spotify-auth-success");
-      res.send("Login successful! You can return to the app.");
-    } catch (err) {
-      console.error("Token error:", err.response?.data || err.message);
-      res.send("Failed to get access token.");
-    }
-  });
-
-  const server = appServer.listen(8888, async () => {
-    console.log("Local server running on port 8888");
-
-    try {
-      const url = await ngrok.connect(8888);
-      redirectUri = `${url}/callback`;
-      console.log(`🔐 Secure tunnel created: ${url}`);
-      console.log(`📝 Add this redirect URI to your Spotify app: ${redirectUri}`);
-
-      if (!ipcMain.listenerCount("spotify-login")) {
-        ipcMain.on("spotify-login", () => {
-          shell.openExternal(`${url}/login`);
-        });
-      }
-
-      ipcMain.on("play-playlist", async (event, playlistUri) => {
-        if (!accessToken) {
-          console.log("Access token missing. Login first.");
-          event.reply("playback-failed", "Not connected. Please login.");
-          return;
-        }
-
-        try {
-          await axios.put(
-            "https://api.spotify.com/v1/me/player/play",
-            { context_uri: playlistUri },
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-          console.log("Playlist started");
-        } catch (err) {
-          console.error("Play error:", err.response?.data || err.message);
-          event.reply("playback-failed", "Playback failed.");
-        }
-      });
-
-    } catch (error) {
-      console.error("Failed to create ngrok tunnel:", error);
-    }
-  });
-
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
-  });
+document.getElementById('forwardBtn').addEventListener('click', () => {
+  audio.currentTime += 10;
 });
 
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
+document.getElementById('backBtn').addEventListener('click', () => {
+  audio.currentTime -= 10;
+});
+
+playPauseBtn.addEventListener('click', () => {
+  if (audio.paused) {
+    audio.play();
+    playPauseBtn.textContent = '⏸️';
+  } else {
+    audio.pause();
+    playPauseBtn.textContent = '▶️';
   }
 });
 
-app.on("before-quit", async () => {
-  await ngrok.kill();
+audio.addEventListener('loadedmetadata', () => {
+  totalTimeLabel.textContent = formatTime(audio.duration);
 });
+
+audio.addEventListener('timeupdate', () => {
+  const percent = (audio.currentTime / audio.duration) * 100;
+  seekBar.value = percent;
+  currentTimeLabel.textContent = formatTime(audio.currentTime);
+});
+
+seekBar.addEventListener('input', () => {
+  const time = (seekBar.value / 100) * audio.duration;
+  audio.currentTime = time;
+});
+
+volumeSlider.addEventListener('input', () => {
+  audio.volume = volumeSlider.value;
+});
+
+audio.addEventListener('ended', () => {
+  playPauseBtn.textContent = '▶️';
+});
+
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+  return `${mins}:${secs}`;
+}
