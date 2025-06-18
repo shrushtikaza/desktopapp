@@ -20,11 +20,19 @@ window.electronAPI.getSongs().then(files => {
 });
 
 function loadSong(index) {
-  if (!songs.length) return;
-  audio.src = songs[index].file;
-  document.querySelector('.cover img').alt = songs[index].title;
-  playPauseBtn.textContent = '▶️';
-  audio.load();
+  return new Promise(resolve => {
+    if (!songs.length) return;
+    audio.src = songs[index].file;
+    playPauseBtn.textContent = '▶️';
+
+    const onCanPlay = () => {
+      audio.removeEventListener('canplaythrough', onCanPlay);
+      resolve();
+    };
+
+    audio.addEventListener('canplaythrough', onCanPlay);
+    audio.load();
+  });
 }
 
 function playSong() {
@@ -37,21 +45,22 @@ function pauseSong() {
   playPauseBtn.textContent = '▶️';
 }
 
-document.getElementById('forwardBtn').addEventListener('click', () => {
+document.getElementById('forwardBtn').addEventListener('click', async () => {
   if (!songs.length) return;
   currentSongIndex = (currentSongIndex + 1) % songs.length;
-  loadSong(currentSongIndex);
+  await loadSong(currentSongIndex);
   playSong();
 });
 
-document.getElementById('backBtn').addEventListener('click', () => {
+document.getElementById('backBtn').addEventListener('click', async () => {
   if (!songs.length) return;
   if (audio.currentTime < 5 && currentSongIndex > 0) {
     currentSongIndex--;
   }
-  loadSong(currentSongIndex);
+  await loadSong(currentSongIndex);
   playSong();
 });
+
 
 playPauseBtn.addEventListener('click', () => {
   if (audio.paused) {
