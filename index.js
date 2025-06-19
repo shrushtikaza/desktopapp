@@ -24,6 +24,9 @@ function loadSong(index) {
     if (!songs.length) return;
     audio.src = songs[index].file;
     playPauseBtn.textContent = '▶️';
+    seekBar.disabled = true;
+    seekBar.value = 0;
+    seekBar.setAttribute('value', 0);
 
     const onCanPlay = () => {
       audio.removeEventListener('canplaythrough', onCanPlay);
@@ -71,6 +74,8 @@ playPauseBtn.addEventListener('click', () => {
 });
 
 audio.addEventListener('loadedmetadata', () => {
+  seekBar.disabled = false;
+  seekBar.value = 0; 
   totalTimeLabel.textContent = formatTime(audio.duration);
 });
 
