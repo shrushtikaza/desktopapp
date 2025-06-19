@@ -13,7 +13,14 @@ window.electronAPI.getSongs().then(files => {
     alert("No songs found in the /songs folder.");
     return;
   }
-  songs = files.map(f => ({ title: f, file: `songs/${f}` }));
+  songs = files.map(f => {
+    const baseName = f.replace(/\.[^/.]+$/, ""); 
+    return {
+      title: baseName,
+      file: `songs/${f}`,
+      image: `images/${baseName}.jpg` 
+    };
+  });  
   loadSong(currentSongIndex);
 }).catch(err => {
   console.error("Error getting songs:", err);
@@ -27,6 +34,12 @@ function loadSong(index) {
     seekBar.disabled = true;
     seekBar.value = 0;
     seekBar.setAttribute('value', 0);
+
+    const albumArt = document.getElementById('albumArt');
+    albumArt.src = songs[index].image;
+    albumArt.onerror = () => {
+      albumArt.src = 'default.jpg'; // fallback image if not found
+    };
 
     const onCanPlay = () => {
       audio.removeEventListener('canplaythrough', onCanPlay);
