@@ -103,10 +103,6 @@ seekBar.addEventListener('input', () => {
   audio.currentTime = time;
 });
 
-volumeSlider.addEventListener('input', () => {
-  audio.volume = volumeSlider.value;
-});
-
 audio.addEventListener('ended', () => {
   if (!songs.length) return;
   currentSongIndex = (currentSongIndex + 1) % songs.length;

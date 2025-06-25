@@ -75,13 +75,7 @@
   <div class="music-player">
 
     <audio id="audio" preload="metadata"></audio>
-    <img id="albumArt" src="" alt="Album Art" style="width: 100%; border-radius: 12px; margin-bottom: 15px; object-fit: cover; height: 200px;">
-
-    <div class="controls">
-      <button id="backBtn">⏮️</button>
-      <button id="playPauseBtn">▶️</button>
-      <button id="forwardBtn">⏭️</button>
-    </div>
+    <img id="albumArt" src="" alt="Album Art" style="width: 270px; border-radius: 12px; margin-bottom: 15px; object-fit: cover; height: 210px;">
 
     <div class="seek-bar">
       <label for="seekBar">Progress</label>
@@ -92,11 +86,11 @@
       </div>
     </div>
 
-    <div class="volume-bar">
-      <label for="volume">Volume</label>
-      <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+    <div class="controls">
+        <button id="backBtn">⏮️</button>
+        <button id="playPauseBtn">▶️</button>
+        <button id="forwardBtn">⏭️</button>
     </div>
-  </div>
 
   <script src="index.js"></script>
 </body>
