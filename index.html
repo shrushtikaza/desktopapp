@@ -3,150 +3,190 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Simple Music Player</title>
+  <title>music player</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body {
-      font-family: sans-serif;
-      background: #111;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
       margin: 0;
-    }
-
-    .music-player {
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 16px;
-      text-align: center;
-      width: 320px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-
-    .controls button {
-      background: #1db954;
-      border: none;
-      color: white;
-      padding: 10px;
-      margin: 5px;
-      font-size: 18px;
-      border-radius: 50%;
-      width: 45px;
-      height: 45px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .controls button:hover {
-      background: #1ed760;
-    }
-
-    .volume-bar {
-      margin-top: 15px;
-    }
-    .seek-bar {
-      width: 270px;
-      position: relative;
-    }
-
-    /* Base range input style */
-    input[type="range"] {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 18px;
-      background: transparent;
-      cursor: pointer;
-    }
-
-    /* Track styling */
-    input[type="range"]::-webkit-slider-runnable-track {
-      height: 11px;
-      background: rgba(255, 236, 71, 1); /* Yellow */
-      border: 3px solid black;
-      border-radius: 16px;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
-      border-bottom-left-radius: 16px;
-      border-bottom-right-radius: 16px;
-    }
-
-    input[type="range"]::-moz-range-track {
-      height: 10px;
-      background: rgba(255, 236, 71, 1);
-      border: 3px solid black;
-      border-radius: 16px;
-    }
-
-    /* Thumb styling */
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      height: 15px;
-      width: 15px;
-      background: rgba(242, 5, 83, 1); /* Red/Pink */
-      border-radius: 50%;
-      margin-top: -4px; /* To align with track */
-      position: relative;
-      z-index: 1;
-      border: 2px solid black;
-    }
-
-    input[type="range"]::-moz-range-thumb {
-      height: 15px;
-      width: 15px;
-      background: rgba(242, 5, 83, 1);
-      border-radius: 50%;
-      border: 2px solid black;
-    }
-
-    /* Disabled state styling (optional) */
-    input[type="range"]:disabled::-webkit-slider-thumb {
-      opacity: 0.6;
-    }
-    input[type="range"]:disabled::-webkit-slider-runnable-track {
-      opacity: 0.6;
-    }
-
-    /* Time display */
-    .time-display {
-      font-size: 14px;
-      margin-top: 5px;
+      padding: 0;
+      background: #f2f2f2;
+      font-family: sans-serif;
       display: flex;
-      justify-content: space-between;
-      color: #ccc;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
-    label {
-      display: block;
-      font-size: 12px;
-      text-align: left;
-      margin-bottom: 4px;
-      color: #aaa;
+    .bg {
+      position: relative;
+      width: 240px;
+      height: 300px;
+      border: 2px solid #1d1b1b;
+      border-radius: 12px;
+      background: rgb(99, 189, 164);
+      padding: 15px;
+      box-sizing: border-box;
     }
+
+    .screen {
+      width: 180px;
+      height: 140px;
+      border: 2px solid black;
+      border-radius: 8px;
+      background: rgb(217, 255, 234);
+      margin: 0 auto; 
+    }
+
+    .scroller {
+      width: 180px;
+      height: 10px;
+      border: 2px solid black;
+      border-radius: 12px;
+      background: rgb(255, 236, 71);
+      position: relative;
+      margin: 15px auto 0;
+    }
+
+    .location {
+      width: 12px;
+      height: 12px;
+      background: rgb(242, 5, 83);
+      border: 2px solid black;
+      border-radius: 50%;
+      position: absolute;
+      top: -3px;
+      left: 40%;
+    }
+
+    .controls {
+      margin-top: 25px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .btn, .playpause {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgb(217, 255, 234);
+      border: 2px solid black;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+    }
+
+    .playpause {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+
+    .btn:hover,
+    .playpause:hover {
+      cursor: pointer;
+      transform: scale(1.05);
+      background: #d4fae3;
+    }
+
+    .btn svg {
+      width: 28px;
+      height: 28px;
+      stroke: black;
+      stroke-width: 2px;
+      fill: rgb(242, 5, 83);
+      border-radius: 4px;
+    }
+    
+    .playpause svg{
+      width: 42px;
+      height: 42px;
+      stroke: black;
+      stroke-width: 1px;
+      fill: rgb(242, 5, 83);
+      border-radius: 4px;
+      transform: scale(1.3);
+    }
+
+
+    .pauseicon {
+      display: flex;
+      gap: 7px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .pausebar {
+      width: 7px;
+      height: 35px;
+      background: rgb(242, 5, 83);
+      border: 2px solid black;
+      border-radius: 4px;
+    }
+
+    .pauseicon,
+    .playicon {
+      position: absolute;
+    }
+
+    .pauseicon {
+      display: none;
+    }
+    
+
   </style>
 </head>
 <body>
-
-  <div class="music-player">
-
-    <audio id="audio" preload="metadata"></audio>
-    <img id="albumArt" src="" alt="Album Art" style="width: 270px; border-radius: 12px; margin-bottom: 15px; object-fit: cover; height: 210px;">
-
-    <div class="seek-bar">
-      <input type="range" id="seekBar" value="0" min="0" max="100" disabled>
-      <div class="time-display">
-        <span id="currentTime">0:00</span>
-        <span id="totalTime">0:00</span>
-      </div>
-    </div>    
-
-    <div class="controls">
-        <button id="backBtn">⏮️</button>
-        <button id="playPauseBtn">▶️</button>
-        <button id="forwardBtn">⏭️</button>
+  <div class="bg">
+    <div class="screen"></div>
+    <div class="scroller">
+      <div class="location"></div>
     </div>
+    <div class="controls">
+      <div class="btn">
+        <i data-lucide="skip-back"></i>
+      </div>
 
-  <script src="index.js"></script>
+      <div class="playpause" id="playPauseBtn">
+        <i data-lucide="play" class="playicon"></i>
+        <div class="pauseicon">
+          <div class="pausebar"></div>
+          <div class="pausebar"></div>
+        </div>
+      </div>
+
+      <div class="btn">
+        <i data-lucide="skip-forward"></i>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const playIcon = playPauseBtn.querySelector('.playicon');
+    const pauseIcon = playPauseBtn.querySelector('.pauseicon');
+
+    let isPlaying = false;
+
+    playPauseBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+
+      if (isPlaying) {
+        playIcon.style.display = 'none';
+        pauseIcon.style.display = 'flex';
+      } else {
+        playIcon.style.display = 'inline';
+        pauseIcon.style.display = 'none';
+      }
+    });
+  </script>
 </body>
 </html>
