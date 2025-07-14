@@ -107,7 +107,7 @@ audio.addEventListener('timeupdate', () => {
     seekBar.value = percent;
     locationDot.style.left = `calc(${seekBar.value}% - 6px)`;
   }
-
+  
   currentTimeLabel.textContent = formatTime(audio.currentTime);
 });
 
