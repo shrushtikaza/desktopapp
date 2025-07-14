@@ -4,6 +4,7 @@ const seekBar = document.getElementById('seekBar');
 const volumeSlider = document.getElementById('volume');
 const currentTimeLabel = document.getElementById('currentTime');
 const totalTimeLabel = document.getElementById('totalTime');
+const locationDot = document.querySelector('.location');
 
 let songs = [];
 let currentSongIndex = 0;
@@ -30,9 +31,13 @@ function loadSong(index) {
   return new Promise(resolve => {
     if (!songs.length) return;
     audio.src = songs[index].file;
-    playPauseBtn.textContent = '▶️';
+
+    document.querySelector('.playicon').style.display = 'inline';
+    document.querySelector('.pauseicon').style.display = 'none';
+
     seekBar.disabled = true;
     seekBar.value = 0;
+    locationDot.style.left = `calc(0% - 6px)`; // Reset dot
     seekBar.setAttribute('value', 0);
 
     const albumArt = document.getElementById('albumArt');
@@ -53,13 +58,16 @@ function loadSong(index) {
 
 function playSong() {
   audio.play();
-  playPauseBtn.textContent = '⏸️';
+  document.querySelector('.playicon').style.display = 'none';
+  document.querySelector('.pauseicon').style.display = 'flex';
 }
 
 function pauseSong() {
   audio.pause();
-  playPauseBtn.textContent = '▶️';
+  document.querySelector('.playicon').style.display = 'inline';
+  document.querySelector('.pauseicon').style.display = 'none';
 }
+
 
 document.getElementById('forwardBtn').addEventListener('click', async () => {
   if (!songs.length) return;
@@ -94,13 +102,20 @@ audio.addEventListener('loadedmetadata', () => {
 
 audio.addEventListener('timeupdate', () => {
   const percent = (audio.currentTime / audio.duration) * 100;
-  seekBar.value = percent;
+
+  if (!isNaN(percent)) {
+    seekBar.value = percent;
+    locationDot.style.left = `calc(${seekBar.value}% - 6px)`;
+  }
+
   currentTimeLabel.textContent = formatTime(audio.currentTime);
 });
+
 
 seekBar.addEventListener('input', () => {
   const time = (seekBar.value / 100) * audio.duration;
   audio.currentTime = time;
+  locationDot.style.left = `calc(${seekBar.value}% - 6px)`;
 });
 
 audio.addEventListener('ended', () => {
