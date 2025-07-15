@@ -6,7 +6,7 @@ function createWindow() {
   const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
  
   const winWidth = 280;
-  const winHeight = 350;
+  const winHeight = 400;
  
   const win = new BrowserWindow({
     title: "happy one year love <3",
@@ -31,8 +31,10 @@ function createWindow() {
 // Helper function to get resource path
 function getResourcePath(relativePath) {
   if (app.isPackaged) {
+    // In packaged app, resources are in process.resourcesPath
     return path.join(process.resourcesPath, relativePath);
   } else {
+    // In development, resources are in __dirname
     return path.join(__dirname, relativePath);
   }
 }
@@ -43,6 +45,11 @@ ipcMain.handle('get-songs', () => {
     
     if (!fs.existsSync(folder)) {
       console.error('Songs folder not found:', folder);
+      // Try alternative paths
+      const altPath1 = path.join(__dirname, 'songs');
+      const altPath2 = path.join(process.cwd(), 'songs');
+      // console.log('Trying alternative path 1:', altPath1, 'exists:', fs.existsSync(altPath1));
+      // console.log('Trying alternative path 2:', altPath2, 'exists:', fs.existsSync(altPath2));
       return [];
     }
     
@@ -63,11 +70,9 @@ ipcMain.handle('get-image-path', (event, filename) => {
       const fileUrl = `file://${imagePath.replace(/\\/g, '/')}`;
       return fileUrl;
     } else {
-      console.error('Image not found:', imagePath);
       return null;
     }
   } catch (error) {
-    console.error('Error getting image path:', error);
     return null;
   }
 });
@@ -90,4 +95,15 @@ ipcMain.handle('get-song-path', (event, filename) => {
   }
 });
 
-app.whenReady().then(createWindow);
+// Debug function to check what's in the resources directory
+app.whenReady().then(() => {
+  createWindow();
+  
+  if (app.isPackaged) {
+    try {
+      const resourcesContents = fs.readdirSync(process.resourcesPath);
+    } catch (err) {
+      console.error('Error reading resourcesPath:', err);
+    }
+  }
+});
