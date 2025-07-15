@@ -1,15 +1,21 @@
+const path = require('path');
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
   packagerConfig: {
     asar: true,
+    icon: path.resolve(__dirname, 'resources/icon') // no .icns/.ico extension
   },
   rebuildConfig: {},
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        name: 'desktop_app',
+        iconUrl: 'https://your-website.com/icon.ico', // OPTIONAL: can be removed for local use
+        setupIcon: path.resolve(__dirname, 'resources/icon.ico')
+      },
     },
     {
       name: '@electron-forge/maker-zip',
@@ -29,8 +35,6 @@ module.exports = {
       name: '@electron-forge/plugin-auto-unpack-natives',
       config: {},
     },
-    // Fuses are used to enable/disable various Electron functionality
-    // at package time, before code signing the application
     new FusesPlugin({
       version: FuseVersion.V1,
       [FuseV1Options.RunAsNode]: false,
