@@ -25,7 +25,7 @@ jobs:
         run: npm run make
 
       - name: 📤 Upload Windows .exe Installer
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: desktopapp-installer
           path: out/make/squirrel.windows/x64/*.exe
