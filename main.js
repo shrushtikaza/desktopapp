@@ -13,7 +13,7 @@ function createWindow() {
     height: winHeight,
     x: screenWidth - winWidth - 20,
     y: 50,                           
-    frame: false,
+    frame: true,
     transparent: false,
     resizable: false,
     hasShadow: true,
