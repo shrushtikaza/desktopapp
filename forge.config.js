@@ -13,11 +13,6 @@ module.exports = {
         from: path.resolve(__dirname, 'images'),
         to: 'images',
         filter: ['**/*']
-      },
-      {
-        from: path.resolve(__dirname, 'songs'),
-        to: 'songs',
-        filter: ['**/*.mp3']
       }
     ]
   },  
