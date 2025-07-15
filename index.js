@@ -18,8 +18,8 @@ window.electronAPI.getSongs().then(files => {
     const baseName = f.replace(/\.[^/.]+$/, ""); 
     return {
       title: baseName,
-      file: `songs/${f}`,
-      image: `images/${baseName}.jpg` 
+      file: f, // Just store the filename
+      image: `${baseName}.jpg` // Just store the filename
     };
   });  
   loadSong(currentSongIndex);
@@ -30,36 +30,50 @@ window.electronAPI.getSongs().then(files => {
 function loadSong(index) {
   return new Promise(resolve => {
     if (!songs.length) return;
-    audio.src = songs[index].file;
-
-    document.querySelector('.playicon').style.display = 'inline';
-    document.querySelector('.pauseicon').style.display = 'none';
-
-    seekBar.disabled = true;
-    seekBar.value = 0;
-    locationDot.style.left = `calc(0% - 6px)`; // Reset dot
-    seekBar.setAttribute('value', 0);
-
-    const albumArt = document.getElementById('albumArt');
-    albumArt.src = songs[index].image;
-    albumArt.onerror = () => {
-      albumArt.src = 'default.jpg'; // fallback image if not found
-    };
     
-    window.electronAPI.getImagePath(`${songs[index].title}.jpg`).then(src => {
-      albumArt.src = src;
-    }).catch(() => {
-      albumArt.src = 'default.jpg';
+    // Get the actual file path for the song from main process
+    window.electronAPI.getSongPath(songs[index].file).then(songPath => {
+      if (songPath) {
+        audio.src = songPath;
+      } else {
+        console.error('Could not get song path for:', songs[index].file);
+        return;
+      }
+
+      document.querySelector('.playicon').style.display = 'inline';
+      document.querySelector('.pauseicon').style.display = 'none';
+
+      seekBar.disabled = true;
+      seekBar.value = 0;
+      locationDot.style.left = `calc(0% - 6px)`; // Reset dot
+      seekBar.setAttribute('value', 0);
+
+      const albumArt = document.getElementById('albumArt');
+      
+      // Get the actual file path for the image
+      window.electronAPI.getImagePath(songs[index].image).then(imagePath => {
+        if (imagePath) {
+          albumArt.src = imagePath;
+          albumArt.onerror = () => {
+            albumArt.src = 'default.jpg'; // fallback image if not found
+          };
+        } else {
+          albumArt.src = 'default.jpg'; // fallback if image path not found
+        }
+      }).catch(() => {
+        albumArt.src = 'default.jpg';
+      });
+
+      const onCanPlay = () => {
+        audio.removeEventListener('canplaythrough', onCanPlay);
+        resolve();
+      };
+
+      audio.addEventListener('canplaythrough', onCanPlay);
+      audio.load();
+    }).catch(err => {
+      console.error('Error loading song:', err);
     });
-
-
-    const onCanPlay = () => {
-      audio.removeEventListener('canplaythrough', onCanPlay);
-      resolve();
-    };
-
-    audio.addEventListener('canplaythrough', onCanPlay);
-    audio.load();
   });
 }
 
@@ -74,7 +88,6 @@ function pauseSong() {
   document.querySelector('.playicon').style.display = 'inline';
   document.querySelector('.pauseicon').style.display = 'none';
 }
-
 
 document.getElementById('forwardBtn').addEventListener('click', async () => {
   if (!songs.length) return;
@@ -91,7 +104,6 @@ document.getElementById('backBtn').addEventListener('click', async () => {
   await loadSong(currentSongIndex);
   playSong();
 });
-
 
 playPauseBtn.addEventListener('click', () => {
   if (audio.paused) {
@@ -117,7 +129,6 @@ audio.addEventListener('timeupdate', () => {
   
   currentTimeLabel.textContent = formatTime(audio.currentTime);
 });
-
 
 seekBar.addEventListener('input', () => {
   const time = (seekBar.value / 100) * audio.duration;

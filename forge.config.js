@@ -13,6 +13,11 @@ module.exports = {
         from: path.resolve(__dirname, 'images'),
         to: 'images',
         filter: ['**/*']
+      },
+      {
+        from: path.resolve(__dirname, 'songs'),
+        to: 'songs',
+        filter: ['**/*']
       }
     ]
   },  
@@ -22,7 +27,7 @@ module.exports = {
       name: '@electron-forge/maker-squirrel',
       config: {
         name: 'happy-anniversary',
-        setupExe: 'happyanniversarysetup.exe', // Installer file name
+        setupExe: 'happyanniversarysetup.exe',
         setupIcon: path.resolve(__dirname, 'resources/icon.ico'),
         iconUrl: 'https://your-website.com/icon.ico'
       },
