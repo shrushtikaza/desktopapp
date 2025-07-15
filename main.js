@@ -9,6 +9,7 @@ function createWindow() {
   const winHeight = 328;
 
   const win = new BrowserWindow({
+    title: "happy one year love <3",
     width: winWidth,
     height: winHeight,
     x: screenWidth - winWidth - 20,

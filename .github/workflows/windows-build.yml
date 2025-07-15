@@ -1,0 +1,31 @@
+name: Build Windows Installer for desktopapp
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch: # Allows manual run from GitHub Actions tab
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 📦 Install Dependencies
+        run: npm install
+
+      - name: 🛠️ Make Windows Installer
+        run: npm run make
+
+      - name: 📤 Upload Windows .exe Installer
+        uses: actions/upload-artifact@v3
+        with:
+          name: desktopapp-installer
+          path: out/make/squirrel.windows/x64/*.exe

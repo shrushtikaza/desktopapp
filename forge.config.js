@@ -4,17 +4,20 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
   packagerConfig: {
+    icon: path.resolve(__dirname, 'resources/icon'),
     asar: true,
-    icon: path.resolve(__dirname, 'resources/icon') // no .icns/.ico extension
-  },
+    name: 'happy anniversary',
+    executableName: 'happyanniversary'
+  },  
   rebuildConfig: {},
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
       config: {
-        name: 'desktop_app',
-        iconUrl: 'https://your-website.com/icon.ico', // OPTIONAL: can be removed for local use
-        setupIcon: path.resolve(__dirname, 'resources/icon.ico')
+        name: 'happy-anniversary',
+        setupExe: 'happyanniversarysetup.exe', // Installer file name
+        setupIcon: path.resolve(__dirname, 'resources/icon.ico'),
+        iconUrl: 'https://your-website.com/icon.ico'
       },
     },
     {
