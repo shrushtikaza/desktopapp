@@ -1,6 +1,7 @@
 {
-  "name": "desktop_app",
+  "name": "happy_anniversary",
   "version": "1.0.0",
+  "productName": "happy anniversary", 
   "description": "",
   "main": "main.js",
   "scripts": {
