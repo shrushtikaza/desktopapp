@@ -7,7 +7,19 @@ module.exports = {
     icon: path.resolve(__dirname, 'resources/icon'),
     asar: true,
     name: 'happy anniversary',
-    executableName: 'happyanniversary'
+    executableName: 'happyanniversary',
+    extraResources: [
+      {
+        from: path.resolve(__dirname, 'images'),
+        to: 'images',
+        filter: ['**/*']
+      },
+      {
+        from: path.resolve(__dirname, 'songs'),
+        to: 'songs',
+        filter: ['**/*.mp3']
+      }
+    ]
   },  
   rebuildConfig: {},
   makers: [

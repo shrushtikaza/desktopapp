@@ -29,9 +29,21 @@ function createWindow() {
 }
 
 ipcMain.handle('get-songs', () => {
-  const folder = path.join(__dirname, 'songs');
+  const folder = path.join(
+    app.isPackaged ? process.resourcesPath : __dirname,
+    'songs'
+  );
   const files = fs.readdirSync(folder).filter(file => file.endsWith('.mp3'));
   return files;
+});
+
+ipcMain.handle('get-image-path', (event, filename) => {
+  const imagePath = path.join(
+    app.isPackaged ? process.resourcesPath : __dirname,
+    'images',
+    filename
+  );
+  return `file://${imagePath}`;
 });
 
 app.whenReady().then(createWindow);

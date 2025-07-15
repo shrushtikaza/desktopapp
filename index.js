@@ -45,6 +45,13 @@ function loadSong(index) {
     albumArt.onerror = () => {
       albumArt.src = 'default.jpg'; // fallback image if not found
     };
+    
+    window.electronAPI.getImagePath(`${songs[index].title}.jpg`).then(src => {
+      albumArt.src = src;
+    }).catch(() => {
+      albumArt.src = 'default.jpg';
+    });
+
 
     const onCanPlay = () => {
       audio.removeEventListener('canplaythrough', onCanPlay);
