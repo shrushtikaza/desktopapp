@@ -18,6 +18,7 @@ function createWindow() {
     transparent: false,
     resizable: false,
     hasShadow: true,
+    icon: path.join(__dirname, 'resources', 'icon.ico'), 
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -28,13 +29,10 @@ function createWindow() {
   win.loadFile('index.html');
 }
 
-// Helper function to get resource path
 function getResourcePath(relativePath) {
   if (app.isPackaged) {
-    // In packaged app, resources are in process.resourcesPath
     return path.join(process.resourcesPath, relativePath);
   } else {
-    // In development, resources are in __dirname
     return path.join(__dirname, relativePath);
   }
 }
@@ -44,19 +42,15 @@ ipcMain.handle('get-songs', () => {
     const folder = getResourcePath('songs');
     
     if (!fs.existsSync(folder)) {
-      console.error('Songs folder not found:', folder);
-      // Try alternative paths
-      const altPath1 = path.join(__dirname, 'songs');
-      const altPath2 = path.join(process.cwd(), 'songs');
-      // console.log('Trying alternative path 1:', altPath1, 'exists:', fs.existsSync(altPath1));
-      // console.log('Trying alternative path 2:', altPath2, 'exists:', fs.existsSync(altPath2));
+      console.error('Songs folder does not exist at:', folder);
       return [];
     }
     
-    const files = fs.readdirSync(folder).filter(file => file.endsWith('.mp3'));
+    const allFiles = fs.readdirSync(folder);
+    
+    const files = allFiles.filter(file => file.endsWith('.mp3'));
     return files;
   } catch (error) {
-    console.error('Error reading songs folder:', error);
     return [];
   }
 });
@@ -64,20 +58,18 @@ ipcMain.handle('get-songs', () => {
 ipcMain.handle('get-image-path', (event, filename) => {
   try {
     const imagePath = getResourcePath(path.join('images', filename));
-    
     if (fs.existsSync(imagePath)) {
-      // Use file:// protocol with proper path formatting for Windows
       const fileUrl = `file://${imagePath.replace(/\\/g, '/')}`;
       return fileUrl;
     } else {
       return null;
     }
   } catch (error) {
+    console.error('Error getting image path:', error);
     return null;
   }
 });
 
-// Add handler for getting song path
 ipcMain.handle('get-song-path', (event, filename) => {
   try {
     const songPath = getResourcePath(path.join('songs', filename));
@@ -95,15 +87,12 @@ ipcMain.handle('get-song-path', (event, filename) => {
   }
 });
 
-// Debug function to check what's in the resources directory
 app.whenReady().then(() => {
   createWindow();
-  
-  if (app.isPackaged) {
-    try {
-      const resourcesContents = fs.readdirSync(process.resourcesPath);
-    } catch (err) {
-      console.error('Error reading resourcesPath:', err);
-    }
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
   }
 });

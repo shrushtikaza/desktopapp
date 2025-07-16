@@ -31,7 +31,6 @@ function loadSong(index) {
   return new Promise(resolve => {
     if (!songs.length) return;
     
-    // Get the actual file path for the song from main process
     window.electronAPI.getSongPath(songs[index].file).then(songPath => {
       if (songPath) {
         audio.src = songPath;
@@ -136,10 +135,10 @@ seekBar.addEventListener('input', () => {
   locationDot.style.left = `calc(${seekBar.value}% - 6px)`;
 });
 
-audio.addEventListener('ended', () => {
+audio.addEventListener('ended', async() => {
   if (!songs.length) return;
   currentSongIndex = (currentSongIndex + 1) % songs.length;
-  loadSong(currentSongIndex);
+  await loadSong(currentSongIndex);
   playSong();
 });
 
