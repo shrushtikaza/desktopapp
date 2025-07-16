@@ -20,6 +20,7 @@
       "main.js",
       "preload.js",
       "index.html",
+      "index.js",
       "renderer.js",
       "node_modules/**/*",
       "package.json"
