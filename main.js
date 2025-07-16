@@ -5,8 +5,8 @@ const fs = require('fs');
 function createWindow() {
   const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
  
-  const winWidth = 280;
-  const winHeight = 400;
+  const winWidth = 265;
+  const winHeight = 380;
  
   const win = new BrowserWindow({
     title: "happy one year love <3",
@@ -29,63 +29,28 @@ function createWindow() {
   win.loadFile('index.html');
 }
 
-function getResourcePath(relativePath) {
-  if (app.isPackaged) {
-    return path.join(process.resourcesPath, relativePath);
-  } else {
-    return path.join(__dirname, relativePath);
-  }
-}
+const isDev = !app.isPackaged;
+const basePath = isDev ? path.join(__dirname, 'songs') : path.join(process.resourcesPath, 'songs');
 
-ipcMain.handle('get-songs', () => {
+ipcMain.handle('get-songs', async () => {
   try {
-    const folder = getResourcePath('songs');
-    
-    if (!fs.existsSync(folder)) {
-      console.error('Songs folder does not exist at:', folder);
-      return [];
-    }
-    
-    const allFiles = fs.readdirSync(folder);
-    
-    const files = allFiles.filter(file => file.endsWith('.mp3'));
+    const files = fs.readdirSync(basePath).filter(file => file.endsWith('.mp3'));
     return files;
-  } catch (error) {
+  } catch (err) {
+    console.error('Error reading songs:', err);
     return [];
   }
 });
 
-ipcMain.handle('get-image-path', (event, filename) => {
-  try {
-    const imagePath = getResourcePath(path.join('images', filename));
-    if (fs.existsSync(imagePath)) {
-      const fileUrl = `file://${imagePath.replace(/\\/g, '/')}`;
-      return fileUrl;
-    } else {
-      return null;
-    }
-  } catch (error) {
-    console.error('Error getting image path:', error);
-    return null;
-  }
+ipcMain.handle('get-song-path', async (event, filename) => {
+  return path.join(basePath, filename);
 });
 
-ipcMain.handle('get-song-path', (event, filename) => {
-  try {
-    const songPath = getResourcePath(path.join('songs', filename));
-    
-    if (fs.existsSync(songPath)) {
-      const fileUrl = `file://${songPath.replace(/\\/g, '/')}`;
-      return fileUrl;
-    } else {
-      console.error('Song not found:', songPath);
-      return null;
-    }
-  } catch (error) {
-    console.error('Error getting song path:', error);
-    return null;
-  }
+ipcMain.handle('get-image-path', async (event, filename) => {
+  const imageBase = isDev ? path.join(__dirname, 'images') : path.join(process.resourcesPath, 'images');
+  return path.join(imageBase, filename);
 });
+
 
 app.whenReady().then(() => {
   createWindow();
