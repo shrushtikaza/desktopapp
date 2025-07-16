@@ -2,29 +2,50 @@
   "name": "happy_anniversary",
   "version": "1.0.0",
   "productName": "happy anniversary",
-  "description": "thanks for the best year",
   "main": "main.js",
+  "description": "thanks for the best year",
   "author": "shrushti",
   "license": "ISC",
   "scripts": {
-    "start": "electron-forge start",
-    "package": "electron-forge package --config=forge.config.js",
-    "make": "electron-forge make --config=forge.config.js"
+    "start": "electron .",
+    "build": "electron-builder"
   },
-  "dependencies": {
-    "electron-squirrel-startup": "^1.0.1"
+  "build": {
+    "productName": "happy anniversary",
+    "appId": "com.yourdomain.happyanniversary",
+    "files": [
+      "dist/**/*",
+      "songs/**/*",
+      "images/**/*",
+      "main.js",
+      "preload.js",
+      "index.html",
+      "renderer.js",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "songs",
+        "to": "songs"
+      },
+      {
+        "from": "images",
+        "to": "images"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "resources/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
   },
   "devDependencies": {
-    "@electron-forge/cli": "^7.8.1",
-    "@electron-forge/maker-deb": "^7.8.1",
-    "@electron-forge/maker-rpm": "^7.8.1",
-    "@electron-forge/maker-squirrel": "^7.8.1",
-    "@electron-forge/maker-zip": "^7.8.1",
-    "@electron-forge/plugin-auto-unpack-natives": "^7.8.1",
-    "axios": "^1.6.8",
-    "dotenv": "^16.3.1",
     "electron": "^36.3.2",
-    "express": "^4.21.2",
-    "open": "^9.1.0"
+    "electron-builder": "^24.13.3"
   }
 }
