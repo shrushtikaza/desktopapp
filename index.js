@@ -49,19 +49,20 @@ function loadSong(index) {
 
       const albumArt = document.getElementById('albumArt');
       
-      // Get the actual file path for the image
       window.electronAPI.getImagePath(songs[index].image).then(imagePath => {
         if (imagePath) {
-          albumArt.src = imagePath;
+          const safePath = `file://${imagePath.replace(/\\/g, '/')}`; // important on Windows
+          albumArt.src = safePath;
+      
           albumArt.onerror = () => {
-            albumArt.src = 'default.jpg'; // fallback image if not found
+            albumArt.src = 'default.jpg'; // fallback
           };
         } else {
-          albumArt.src = 'default.jpg'; // fallback if image path not found
+          albumArt.src = 'default.jpg';
         }
       }).catch(() => {
         albumArt.src = 'default.jpg';
-      });
+      });      
 
       const onCanPlay = () => {
         audio.removeEventListener('canplaythrough', onCanPlay);

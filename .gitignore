@@ -1,6 +1,2 @@
 node_modules/
-.env
-certs/
-index2.html
-out/
 dist/
