@@ -50,18 +50,21 @@ function loadSong(index) {
       const albumArt = document.getElementById('albumArt');
       
       window.electronAPI.getImagePath(songs[index].image).then(imagePath => {
+        const albumArt = document.getElementById('albumArt');
+        const fallback = `file://${path.join(process.resourcesPath, 'images', 'default.jpg').replace(/\\/g, '/')}`;
+      
         if (imagePath) {
-          const safePath = `file://${imagePath.replace(/\\/g, '/')}`; // important on Windows
+          const safePath = `file://${imagePath.replace(/\\/g, '/')}`;
           albumArt.src = safePath;
       
           albumArt.onerror = () => {
-            albumArt.src = 'default.jpg'; // fallback
+            albumArt.src = fallback;
           };
         } else {
-          albumArt.src = 'default.jpg';
+          albumArt.src = fallback;
         }
       }).catch(() => {
-        albumArt.src = 'default.jpg';
+        albumArt.src = fallback;
       });      
 
       const onCanPlay = () => {
