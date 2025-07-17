@@ -1,13 +1,14 @@
-const { app, BrowserWindow, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, protocol } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const mime = require('mime'); 
 
 function createWindow() {
   const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
- 
+
   const winWidth = 265;
   const winHeight = 380;
- 
+
   const win = new BrowserWindow({
     title: "happy one year love <3",
     width: winWidth,
@@ -16,18 +17,43 @@ function createWindow() {
     y: 50,
     frame: true,
     transparent: false,
-    resizable: false,
+    resizable: true,
     hasShadow: true,
-    icon: path.join(__dirname, 'resources', 'icon.ico'), 
+    icon: path.join(__dirname, 'resources', 'icon.ico'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
     }
   });
- 
+
   win.loadFile('index.html');
 }
+
+app.whenReady().then(() => {
+  protocol.handle('app-image', async (request) => {
+    const imageName = decodeURIComponent(request.url.replace('app-image://', ''));
+    const isDev = !app.isPackaged;
+    const imageBase = isDev
+      ? path.join(__dirname, 'images')
+      : path.join(process.resourcesPath, 'images');
+    const imagePath = path.join(imageBase, imageName);
+
+    try {
+      const data = await fs.promises.readFile(imagePath);
+      return new Response(data, {
+        headers: {
+          'Content-Type': mime.getType(imagePath) || 'application/octet-stream'
+        }
+      });
+    } catch (err) {
+      console.error('Image fetch error:', err);
+      return new Response(null, { status: 404 });
+    }
+  });
+
+  createWindow();
+});
 
 const isDev = !app.isPackaged;
 const basePath = isDev ? path.join(__dirname, 'songs') : path.join(process.resourcesPath, 'songs');
@@ -47,13 +73,23 @@ ipcMain.handle('get-song-path', async (event, filename) => {
 });
 
 ipcMain.handle('get-image-path', async (event, filename) => {
-  const imageBase = isDev ? path.join(__dirname, 'images') : path.join(process.resourcesPath, 'images');
-  return path.join(imageBase, filename);
-});
+  const imageBase = isDev
+    ? path.join(__dirname, 'images')
+    : path.join(process.resourcesPath, 'images');
+  const requestedPath = path.join(imageBase, filename);
 
+  if (fs.existsSync(requestedPath)) {
+    return filename;
+  }
 
-app.whenReady().then(() => {
-  createWindow();
+  const defaultPath = path.join(imageBase, 'default.jpg');
+  if (fs.existsSync(defaultPath)) {
+    console.log('Using default image');
+    return 'default.jpg';
+  }
+
+  console.log('No images found');
+  return null;
 });
 
 app.on('activate', () => {

@@ -14,14 +14,16 @@ window.electronAPI.getSongs().then(files => {
     alert("No songs found in the /songs folder.");
     return;
   }
+
   songs = files.map(f => {
-    const baseName = f.replace(/\.[^/.]+$/, ""); 
+    const baseName = f.replace(/\.[^/.]+$/, "");
     return {
       title: baseName,
-      file: f, // Just store the filename
-      image: `${baseName}.jpg` // Just store the filename
+      file: f,
+      image: `${baseName}.jpg`
     };
-  });  
+  });
+
   loadSong(currentSongIndex);
 }).catch(err => {
   console.error("Error getting songs:", err);
@@ -29,53 +31,59 @@ window.electronAPI.getSongs().then(files => {
 
 function loadSong(index) {
   return new Promise(resolve => {
-    if (!songs.length) return;
-    
-    window.electronAPI.getSongPath(songs[index].file).then(songPath => {
-      if (songPath) {
-        audio.src = songPath;
-      } else {
-        console.error('Could not get song path for:', songs[index].file);
+    if (!songs.length) {
+      resolve();
+      return;
+    }
+
+    const song = songs[index];
+
+    window.electronAPI.getSongPath(song.file).then(songPath => {
+      if (!songPath) {
+        console.error('Could not get song path for:', song.file);
+        resolve();
         return;
       }
+
+      audio.src = songPath;
 
       document.querySelector('.playicon').style.display = 'inline';
       document.querySelector('.pauseicon').style.display = 'none';
 
       seekBar.disabled = true;
       seekBar.value = 0;
-      locationDot.style.left = `calc(0% - 6px)`; // Reset dot
-      seekBar.setAttribute('value', 0);
+      locationDot.style.left = `calc(0% - 6px)`;
 
       const albumArt = document.getElementById('albumArt');
-      
-      window.electronAPI.getImagePath(songs[index].image).then(imagePath => {
-        const albumArt = document.getElementById('albumArt');
-        const fallback = `file://${path.join(process.resourcesPath, 'images', 'default.jpg').replace(/\\/g, '/')}`;
-      
-        if (imagePath) {
-          const safePath = `file://${imagePath.replace(/\\/g, '/')}`;
-          albumArt.src = safePath;
-      
-          albumArt.onerror = () => {
-            albumArt.src = fallback;
-          };
-        } else {
-          albumArt.src = fallback;
-        }
-      }).catch(() => {
-        albumArt.src = fallback;
-      });      
+
+      window.electronAPI.getImagePath(song.image).then(imagePath => {
+
+        const finalImage = imagePath ? encodeURIComponent(imagePath) : 'default.jpg';
+        const imageUrl = `app-image://${finalImage}`;
+
+        albumArt.src = imageUrl;
+
+        albumArt.onerror = () => {
+          albumArt.src = `app-image://${encodeURIComponent('default.jpg')}`;
+        };
+
+        albumArt.onload = () => {
+          console.log('Image loaded successfully:', imageUrl);
+        };
+      }).catch(err => {
+        console.error('Error getting image path:', err);
+      });
 
       const onCanPlay = () => {
         audio.removeEventListener('canplaythrough', onCanPlay);
         resolve();
       };
 
-      audio.addEventListener('canplaythrough', onCanPlay);
+      audio.addEventListener('canplaythrough', onCanPlay, { once: true });
       audio.load();
     }).catch(err => {
       console.error('Error loading song:', err);
+      resolve();
     });
   });
 }
@@ -118,19 +126,16 @@ playPauseBtn.addEventListener('click', () => {
 
 audio.addEventListener('loadedmetadata', () => {
   seekBar.disabled = false;
-  seekBar.value = 0; 
+  seekBar.value = 0;
   totalTimeLabel.textContent = formatTime(audio.duration);
 });
 
 audio.addEventListener('timeupdate', () => {
   const percent = (audio.currentTime / audio.duration) * 100;
-
   if (!isNaN(percent)) {
     seekBar.value = percent;
     locationDot.style.left = `calc(${seekBar.value}% - 6px)`;
   }
-  
-  currentTimeLabel.textContent = formatTime(audio.currentTime);
 });
 
 seekBar.addEventListener('input', () => {
@@ -139,7 +144,7 @@ seekBar.addEventListener('input', () => {
   locationDot.style.left = `calc(${seekBar.value}% - 6px)`;
 });
 
-audio.addEventListener('ended', async() => {
+audio.addEventListener('ended', async () => {
   if (!songs.length) return;
   currentSongIndex = (currentSongIndex + 1) % songs.length;
   await loadSong(currentSongIndex);
