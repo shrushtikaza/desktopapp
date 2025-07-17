@@ -1,9 +1,6 @@
 const audio = document.getElementById('audio');
 const playPauseBtn = document.getElementById('playPauseBtn');
 const seekBar = document.getElementById('seekBar');
-const volumeSlider = document.getElementById('volume');
-const currentTimeLabel = document.getElementById('currentTime');
-const totalTimeLabel = document.getElementById('totalTime');
 const locationDot = document.querySelector('.location');
 
 let songs = [];
@@ -57,7 +54,6 @@ function loadSong(index) {
       const albumArt = document.getElementById('albumArt');
 
       window.electronAPI.getImagePath(song.image).then(imagePath => {
-
         const finalImage = imagePath ? encodeURIComponent(imagePath) : 'default.jpg';
         const imageUrl = `app-image://${finalImage}`;
 
@@ -127,7 +123,6 @@ playPauseBtn.addEventListener('click', () => {
 audio.addEventListener('loadedmetadata', () => {
   seekBar.disabled = false;
   seekBar.value = 0;
-  totalTimeLabel.textContent = formatTime(audio.duration);
 });
 
 audio.addEventListener('timeupdate', () => {
@@ -150,9 +145,3 @@ audio.addEventListener('ended', async () => {
   await loadSong(currentSongIndex);
   playSong();
 });
-
-function formatTime(seconds) {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
-  return `${mins}:${secs}`;
-}
